@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS 16 Pro Max</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: url('https://i.pinimg.com/originals/da/30/4f/da304f7ca47a5d36f3f3d60fa22b20ed.webp') center/cover no-repeat fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (min-width: 1024px) {
+            body {
+                max-width: 430px;
+                margin: 0 auto;
+                border-radius: 40px;
+                box-shadow: 0 0 50px rgba(0,0,0,0.3);
+                position: relative;
+            }
+
+            .unlock-slider {
+                cursor: grab;
+            }
+
+            .unlock-slider:active {
+                cursor: grabbing;
+            }
+        }
+
+        .dynamic-island {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 35px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .dynamic-island:active {
+            width: 200px;
+            height: 150px;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.1) 100%);
+            backdrop-filter: blur(2px);
+        }
+
+        .status-bar {
+            padding: 60px 20px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .battery {
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            padding: 2px 8px;
+            border-radius: 12px;
+            backdrop-filter: blur(5px);
+        }
+
+        .time {
+            font-size: 90px;
+            font-weight: 200;
+            text-align: center;
+            margin-top: 60px;
+            z-index: 1;
+            letter-spacing: -1px;
+            animation: fadeInDown 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .date {
+            font-size: 22px;
+            text-align: center;
+            margin-top: 10px;
+            z-index: 1;
+            opacity: 0.9;
+            animation: fadeInUp 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .notifications {
+            margin-top: 30px;
+            padding: 20px;
+            z-index: 1;
+        }
+
+        .notification {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transform: translateX(-100%);
+            animation: slideIn 0.5s forwards;
+        }
+
+        .bottom-text {
+            position: absolute;
+            bottom: 50px;
+            width: 100%;
+            text-align: center;
+            font-size: 18px;
+            z-index: 1;
+            opacity: 0.8;
+        }
+
+        .unlock-slider {
+            width: 100%;
+            position: absolute;
+            bottom: 20px;
+            display: flex;
+            justify-content: center;
+            z-index: 1;
+            animation: fadeInUp 1s cubic-bezier(0.4, 0, 0.2, 1) 0.3s backwards;
+        }
+
+        .unlock-slider div {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            backdrop-filter: blur(10px);
+            animation: pulse 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .unlock-slider div:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .unlock-slider div.dragging {
+            transform: scale(0.95);
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+
+        @keyframes slideIn {
+            to { transform: translateX(0); }
+        }
+
+        .unlock-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0);
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .unlocking {
+            animation: unlockEffect 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes unlockEffect {
+            0% {
+                transform: scale(1);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        .weather-widget {
+            position: absolute;
+            top: 100px;
+            right: 20px;
+            z-index: 1;
+            font-size: 24px;
+            text-align: right;
+            opacity: 0.9;
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 380px) {
+            .time {
+                font-size: 72px;
+            }
+            .date {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    <div class="dynamic-island"></div>
+    
+    <div class="weather-widget">
+        23°C ⛅
+    </div>
+
+    <div class="status-bar">
+        <span>🔒</span>
+        <span class="battery">85% 🔋</span>
+    </div>
+    
+    <div class="time" id="time">14:30</div>
+    <div class="date" id="date">Понедеьник, 18 марта</div>
+
+    <div class="notifications" id="notifications"></div>
+    
+    <div class="bottom-text">Проведите вверх для разблокировки</div>
+    <div class="unlock-slider">
+        <div></div>
+    </div>
+
+    <div class="unlock-animation" id="unlockAnimation"></div>
+
+    <script>
+        function updateTime() {
+            const now = new Date();
+            const timeElement = document.getElementById('time');
+            const dateElement = document.getElementById('date');
+            
+            timeElement.textContent = now.toLocaleTimeString('ru-RU', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            
+            dateElement.textContent = now.toLocaleDateString('ru-RU', {
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long'
+            });
+        }
+
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        let startY = 0;
+        let currentY = 0;
+        let isUnlocking = false;
+
+        document.body.addEventListener('touchstart', (e) => {
+            if (isUnlocking) return;
+            startY = e.touches[0].clientY;
+        });
+
+        document.body.addEventListener('touchmove', (e) => {
+            if (isUnlocking) return;
+            currentY = e.touches[0].clientY;
+            const delta = startY - currentY;
+            
+            if (delta > 100) {
+                isUnlocking = true;
+                const animation = document.getElementById('unlockAnimation');
+                animation.classList.add('unlocking');
+                
+                document.body.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+                document.body.style.transform = 'scale(0.9)';
+                
+                setTimeout(() => {
+                    window.location.href = 'homescreen.html';
+                }, 500);
+            }
+        });
+
+        // Добавление случайных уведомлений
+        const notifications = [
+            "📱 Новое сообщение от Анны",
+            "📸 Память заполнена на 95%",
+            "🎵 Сейчас играет: Любимый трек",
+            "📅 Встреча через 30 минут"
+        ];
+
+        function addNotification() {
+            const container = document.getElementById('notifications');
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = notifications[Math.floor(Math.random() * notifications.length)];
+            container.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        setInterval(addNotification, 3000);
+
+        // Улучшенная поддержка мыши
+        const slider = document.querySelector('.unlock-slider div');
+        let isDragging = false;
+        let startDragY = 0;
+
+        slider.addEventListener('mousedown', (e) => {
+            if (isUnlocking) return;
+            isDragging = true;
+            startDragY = e.clientY;
+            slider.classList.add('dragging');
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isDragging || isUnlocking) return;
+            
+            const deltaY = startDragY - e.clientY;
+            const newPosition = Math.min(Math.max(-deltaY, -100), 0);
+            slider.style.transform = `translateY(${newPosition}px)`;
+            
+            if (deltaY > 100) {
+                isUnlocking = true;
+                const animation = document.getElementById('unlockAnimation');
+                animation.classList.add('unlocking');
+                
+                document.body.style.transition = 'transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+                document.body.style.transform = 'scale(0.9)';
+                
+                setTimeout(() => {
+                    window.location.href = 'homescreen.html';
+                }, 500);
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (!isDragging || isUnlocking) return;
+            isDragging = false;
+            slider.classList.remove('dragging');
+            slider.style.transform = 'translateY(0)';
+        });
+    </script>
+</body>
+</html>

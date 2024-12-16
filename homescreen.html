@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iOS 16 Pro Max Home</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            user-select: none;
+        }
+
+        body {
+            background: url('https://i.pinimg.com/originals/da/30/4f/da304f7ca47a5d36f3f3d60fa22b20ed.webp') center/cover no-repeat fixed;
+            height: 100vh;
+            color: white;
+            overflow: hidden;
+        }
+
+        .dynamic-island {
+            position: fixed;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 35px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            z-index: 1000;
+        }
+
+        .status-bar {
+            padding: 60px 20px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 25px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .app-icon {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: scaleIn 0.4s cubic-bezier(0.17, 0.67, 0.26, 1.01);
+            transition: transform 0.2s cubic-bezier(0.17, 0.67, 0.26, 1.01);
+            cursor: pointer;
+            pointer-events: auto;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        @keyframes scaleIn {
+            0% {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .app-icon:active {
+            transform: scale(0.8);
+            transition: transform 0.2s cubic-bezier(0.17, 0.67, 0.26, 1.01);
+        }
+
+        .app-icon:hover {
+            animation: subtle-bounce 1s cubic-bezier(0.17, 0.67, 0.26, 1.01);
+        }
+
+        @keyframes subtle-bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .icon {
+            width: 65px;
+            height: 65px;
+            background-size: cover;
+            background-position: center;
+            border-radius: 18px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.17, 0.67, 0.26, 1.01);
+        }
+
+        .icon::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+            border-radius: 18px;
+        }
+
+        .app-name {
+            font-size: 12px;
+            text-align: center;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .dock {
+            position: fixed;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 85%;
+            height: 85px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            backdrop-filter: blur(20px);
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            animation: slideUp 0.6s cubic-bezier(0.17, 0.67, 0.26, 1.01);
+        }
+
+        @keyframes slideUp {
+            0% {
+                transform: translate(-50%, 100%);
+                opacity: 0;
+            }
+            100% {
+                transform: translate(-50%, 0);
+                opacity: 1;
+            }
+        }
+
+        .dock .icon {
+            margin-bottom: 0;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .widgets-overlay {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            transition: left 0.3s ease;
+            z-index: 100;
+        }
+
+        .search-bar {
+            position: fixed;
+            top: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 85%;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            z-index: 2;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .search-bar input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            padding-left: 10px;
+        }
+
+        .search-bar input::placeholder {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(20px);
+            border-radius: 0 0 15px 15px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .search-bar.active .search-results {
+            display: block;
+        }
+
+        @media (min-width: 1024px) {
+            body {
+                max-width: 430px;
+                margin: 0 auto;
+                height: 100vh;
+                position: relative;
+                box-shadow: 0 0 50px rgba(0,0,0,0.3);
+            }
+
+            .app-grid {
+                gap: 20px;
+                padding: 15px;
+            }
+
+            .icon {
+                width: 55px;
+                height: 55px;
+                font-size: 24px;
+            }
+
+            .dock {
+                bottom: 15px;
+            }
+        }
+
+        .battery-icon {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .battery-icon::before {
+            content: '';
+            width: 25px;
+            height: 12px;
+            border: 2px solid #fff;
+            border-radius: 3px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .battery-icon::after {
+            content: '';
+            width: 2px;
+            height: 4px;
+            background: #fff;
+            border-radius: 0 2px 2px 0;
+            position: absolute;
+            right: -4px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+    </style>
+</head>
+<body>
+    <div class="dynamic-island"></div>
+    
+    <div class="status-bar">
+        <span>5G</span>
+        <span class="battery-icon">85%</span>
+    </div>
+
+    <div class="app-grid">
+        <div class="app-icon" style="animation-delay: 0.1s">
+            <div class="icon" style="background-image: url('https://i.imgur.com/Q9MiVGG.png')"></div>
+            <div class="app-name">Телефон</div>
+        </div>
+        <div class="app-icon" style="animation-delay: 0.2s">
+            <div class="icon" style="background-image: url('https://i.imgur.com/XqZF3g8.png')"></div>
+            <div class="app-name">Сообщения</div>
+        </div>
+        <div class="app-icon" style="animation-delay: 0.3s">
+            <div class="icon" style="background-image: url('https://i.imgur.com/dK9Jeih.png')"></div>
+            <div class="app-name">Safari</div>
+        </div>
+        <div class="app-icon" style="animation-delay: 0.4s">
+            <div class="icon" style="background-image: url('https://i.imgur.com/N6J3JXv.png')"></div>
+            <div class="app-name">Камера</div>
+        </div>
+        <div class="app-icon" style="animation-delay: 0.5s">
+            <div class="icon">🎵</div>
+            <div class="app-name">Музыка</div>
+        </div>
+        <div class="app-icon" style="animation-delay: 0.6s">
+            <div class="icon">⚙️</div>
+            <div class="app-name">Настройки</div>
+        </div>
+        <div class="app-icon" style="animation-delay: 0.7s">
+            <div class="icon">📅</div>
+            <div class="app-name">Календарь</div>
+        </div>
+        <div class="app-icon" style="animation-delay: 0.8s">
+            <div class="icon">🔋</div>
+            <div class="app-name">Батарея</div>
+        </div>
+        <div class="app-icon" style="animation-delay: 0.9s">
+            <div class="icon">🎮</div>
+            <div class="app-name">Игры</div>
+        </div>
+        <div class="app-icon" style="animation-delay: 1s">
+            <div class="icon">📷</div>
+            <div class="app-name">Фото</div>
+        </div>
+        <div class="app-icon" style="animation-delay: 1.1s">
+            <div class="icon">🎥</div>
+            <div class="app-name">Видео</div>
+        </div>
+        <div class="app-icon" style="animation-delay: 1.2s">
+            <div class="icon">📝</div>
+            <div class="app-name">Заметки</div>
+        </div>
+    </div>
+
+    <div class="dock">
+        <div class="icon">📞</div>
+        <div class="icon">✉️</div>
+        <div class="icon">🌍</div>
+        <div class="icon">🎵</div>
+    </div>
+
+    <div class="widgets-overlay"></div>
+
+    <script>
+        // Анимация иконок при касании
+        document.querySelectorAll('.app-icon').forEach(icon => {
+            icon.addEventListener('touchstart', () => {
+                icon.style.transform = 'scale(0.8)';
+            });
+            
+            icon.addEventListener('touchend', () => {
+                icon.style.transform = 'scale(1)';
+                setTimeout(() => {
+                    icon.style.transform = 'scale(1.05)';
+                }, 100);
+                setTimeout(() => {
+                    icon.style.transform = 'scale(1)';
+                }, 200);
+            });
+        });
+
+        // Жест для открытия виджетов
+        let startX = 0;
+        document.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+        });
+
+        document.addEventListener('touchmove', (e) => {
+            const deltaX = e.touches[0].clientX - startX;
+            if (deltaX > 50) {
+                document.querySelector('.widgets-overlay').style.left = '0';
+            }
+        });
+
+        // Dynamic Island анимация
+        const dynamicIsland = document.querySelector('.dynamic-island');
+        dynamicIsland.addEventListener('click', () => {
+            dynamicIsland.style.width = dynamicIsland.style.width === '200px' ? '120px' : '200px';
+            dynamicIsland.style.height = dynamicIsland.style.height === '150px' ? '35px' : '150px';
+        });
+
+        // Поддержка мыши для анимаций
+        document.querySelectorAll('.app-icon').forEach(icon => {
+            icon.addEventListener('mousedown', () => {
+                icon.style.transform = 'scale(0.9)';
+            });
+            
+            icon.addEventListener('mouseup', () => {
+                icon.style.transform = 'scale(1)';
+            });
+            
+            icon.addEventListener('mouseleave', () => {
+                icon.style.transform = 'scale(1)';
+            });
+        });
+
+        // Модификация жеста для виджетов
+        document.addEventListener('mousemove', (e) => {
+            if (e.clientX < 50) {
+                document.querySelector('.widgets-overlay').style.left = '0';
+            }
+        });
+
+        // Исправление бага с анимацией при наведении
+        let touchTimeout;
+        let isAnimating = false;
+
+        document.querySelectorAll('.app-icon').forEach(icon => {
+            icon.addEventListener('mouseenter', () => {
+                if (isAnimating) return;
+                clearTimeout(touchTimeout);
+                icon.style.transform = 'scale(1.1)';
+            });
+
+            icon.addEventListener('mouseleave', () => {
+                clearTimeout(touchTimeout);
+                icon.style.transform = 'scale(1)';
+            });
+
+            icon.addEventListener('mousedown', () => {
+                if (isAnimating) return;
+                isAnimating = true;
+                icon.style.transform = 'scale(0.95)';
+            });
+
+            icon.addEventListener('mouseup', () => {
+                if (!isAnimating) return;
+                icon.style.transform = 'scale(1.1)';
+                touchTimeout = setTimeout(() => {
+                    icon.style.transform = 'scale(1)';
+                    isAnimating = false;
+                }, 200);
+            });
+
+            // Сброс состояния при потере фокуса
+            window.addEventListener('blur', () => {
+                clearTimeout(touchTimeout);
+                icon.style.transform = 'scale(1)';
+                isAnimating = false;
+            });
+        });
+
+        // Предзагрузка изображений
+        const preloadImages = [
+            'https://i.imgur.com/Q9MiVGG.png',
+            'https://i.imgur.com/XqZF3g8.png',
+            'https://i.imgur.com/dK9Jeih.png',
+            'https://i.imgur.com/N6J3JXv.png',
+            // Добавьте остальные URL иконок
+        ];
+
+        preloadImages.forEach(url => {
+            const img = new Image();
+            img.src = url;
+        });
+    </script>
+</body>
+</html>
