@@ -33,47 +33,55 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: all 0.4s ease;
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         .dynamic-island.expanded {
             width: 350px;
             height: 150px;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .status-bar {
             padding: 60px 20px 20px;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: center;
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            gap: 10px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
         }
 
         .status-icons {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
         }
 
         .wifi-icon::before {
-            content: '📶';
-            font-size: 14px;
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24"><path d="M12 6C8.62 6 5.5 7.12 3 9L1.2 6.6C4.21 4.34 7.95 3 12 3C16.05 3 19.79 4.34 22.8 6.6L21 9C18.5 7.12 15.38 6 12 6zM16.84 13.41C15.44 12.5 13.78 12 12 12C10.22 12 8.56 12.5 7.16 13.41L5.36 11C7.23 9.72 9.53 9 12 9C14.47 9 16.77 9.72 18.64 11L16.84 13.41zM12 15C10.65 15 9.4 15.45 8.4 16.25L12 21L15.6 16.25C14.6 15.45 13.35 15 12 15z"/></svg>') center/cover no-repeat;
         }
 
         .signal-icon::before {
-            content: '📱';
-            font-size: 14px;
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24"><path d="M2 22h20V2z"/></svg>') center/cover no-repeat;
         }
 
         .battery-container {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 8px 15px;
-            border-radius: 12px;
-            color: black;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-weight: 500;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
         }
 
         .app-grid {
@@ -89,33 +97,36 @@
             flex-direction: column;
             align-items: center;
             animation: scaleIn 0.6s cubic-bezier(0.17, 0.67, 0.26, 1.01);
-            transition: transform 0.2s cubic-bezier(0.17, 0.67, 0.26, 1.01);
             cursor: pointer;
             pointer-events: auto;
             -webkit-tap-highlight-color: transparent;
+            transform-origin: center bottom;
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
         @keyframes scaleIn {
             0% {
-                transform: scale(0.9);
+                transform: scale(0.8) translateY(20px);
                 opacity: 0;
             }
-            50% {
-                transform: scale(1.1);
+            60% {
+                transform: scale(1.1) translateY(-5px);
+            }
+            80% {
+                transform: scale(0.95) translateY(2px);
             }
             100% {
-                transform: scale(1);
+                transform: scale(1) translateY(0);
                 opacity: 1;
             }
         }
 
         .app-icon:active {
-            transform: scale(0.8);
-            transition: transform 0.2s cubic-bezier(0.17, 0.67, 0.26, 1.01);
+            transform: scale(0.8) !important;
         }
 
         .app-icon:hover {
-            transform: scale(1.05);
+            transform: scale(1.1);
         }
 
         .icon {
@@ -161,13 +172,16 @@
             transform: translateX(-50%);
             width: 85%;
             height: 85px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.2);
             border-radius: 30px;
             backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
             display: flex;
             justify-content: space-evenly;
             align-items: center;
             animation: slideUp 0.6s cubic-bezier(0.17, 0.67, 0.26, 1.01);
+            padding: 0 15px;
         }
 
         @keyframes slideUp {
@@ -182,7 +196,22 @@
         }
 
         .dock .icon {
-            margin-bottom: 0;
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+            backdrop-filter: blur(10px);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 26px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .dock .icon:active {
+            transform: scale(0.8);
         }
 
         @media (min-width: 1024px) {
@@ -208,6 +237,93 @@
             .dock {
                 bottom: 15px;
             }
+        }
+
+        /* Адаптивность для разных устройств */
+        @media (max-width: 768px) {
+            .app-grid {
+                gap: 15px;
+                padding: 15px;
+                margin-top: 100px;
+            }
+
+            .icon {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+
+            .app-name {
+                font-size: 11px;
+            }
+
+            .dock {
+                width: 92%;
+                height: 80px;
+                bottom: 20px;
+                border-radius: 35px;
+            }
+
+            .dynamic-island {
+                width: 100px;
+                height: 30px;
+            }
+        }
+
+        @media (min-width: 769px) {
+            body {
+                max-width: 430px;
+                margin: 0 auto;
+                border-radius: 40px;
+                box-shadow: 0 0 50px rgba(0,0,0,0.3);
+                position: relative;
+                overflow: hidden;
+            }
+
+            .app-grid {
+                gap: 25px;
+                padding: 20px;
+                margin-top: 120px;
+            }
+
+            .icon {
+                width: 70px;
+                height: 70px;
+                font-size: 30px;
+            }
+
+            .dock {
+                width: 85%;
+                bottom: 25px;
+            }
+
+            /* Добавляем декоративные элементы для ПК версии */
+            body::before {
+                display: none;
+            }
+        }
+
+        /* Улучшенная анимация для иконок */
+        .app-icon[onclick] {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .app-icon[onclick]::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: 18px;
+        }
+
+        .app-icon[onclick]:active::after {
+            opacity: 1;
         }
     </style>
 </head>
@@ -277,29 +393,46 @@
     </div>
 
     <div class="dock">
-        <div class="icon">📞</div>
-        <div class="icon">✉️</div>
-        <div class="icon">🌍</div>
-        <div class="icon">🎵</div>
+        <div class="icon" onclick="openApp('tel:')">📞</div>
+        <div class="icon" onclick="openApp('sms:')">✉️</div>
+        <div class="icon" onclick="openApp('https://www.google.com')">🌍</div>
+        <div class="icon" onclick="openApp('music:')">🎵</div>
     </div>
 
     <div class="widgets-overlay"></div>
 
     <script>
-        // Анимация иконок при касании
-        document.querySelectorAll('.app-icon').forEach(icon => {
+        // Обновляем функцию openApp для всех иконок
+        function openApp(url) {
+            const icon = event.currentTarget;
+            icon.style.transform = 'scale(0.8)';
+            
+            setTimeout(() => {
+                icon.style.transform = '';
+                window.location.href = url;
+            }, 200);
+        }
+
+        // Добавляем обработчики для всех иконок
+        document.querySelectorAll('.app-icon, .dock .icon').forEach(icon => {
             icon.addEventListener('touchstart', () => {
                 icon.style.transform = 'scale(0.8)';
             });
-            
+
             icon.addEventListener('touchend', () => {
-                icon.style.transform = 'scale(1)';
-                setTimeout(() => {
-                    icon.style.transform = 'scale(1.05)';
-                }, 100);
-                setTimeout(() => {
-                    icon.style.transform = 'scale(1)';
-                }, 200);
+                icon.style.transform = '';
+            });
+
+            icon.addEventListener('mousedown', () => {
+                icon.style.transform = 'scale(0.8)';
+            });
+
+            icon.addEventListener('mouseup', () => {
+                icon.style.transform = '';
+            });
+
+            icon.addEventListener('mouseleave', () => {
+                icon.style.transform = '';
             });
         });
 
@@ -336,21 +469,6 @@
             } else {
                 dynamicIsland.innerHTML = '';
             }
-        });
-
-        // Поддержка мыши для анимаций
-        document.querySelectorAll('.app-icon').forEach(icon => {
-            icon.addEventListener('mousedown', () => {
-                icon.style.transform = 'scale(0.9)';
-            });
-            
-            icon.addEventListener('mouseup', () => {
-                icon.style.transform = 'scale(1)';
-            });
-            
-            icon.addEventListener('mouseleave', () => {
-                icon.style.transform = 'scale(1)';
-            });
         });
 
         // Модификация жеста для виджетов
@@ -412,25 +530,6 @@
             const img = new Image();
             img.src = url;
         });
-
-        function openApp(url) {
-            window.location.href = url;
-        }
-
-        function openCamera() {
-            // Проверяем, на каком устройстве запущено
-            if (/Android|iPhone/i.test(navigator.userAgent)) {
-                // Для мобильных - открываем камеру
-                navigator.mediaDevices.getUserMedia({ video: true })
-                    .then(stream => {
-                        // Открываем нативное приложение камеры
-                    })
-                    .catch(err => console.log(err));
-            } else {
-                // Для ПК открываем "Этот компьютер"
-                window.location.href = 'file:///';
-            }
-        }
     </script>
 </body>
 </html>

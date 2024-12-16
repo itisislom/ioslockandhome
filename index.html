@@ -49,41 +49,128 @@
         }
 
         .status-bar {
-            width: 100%;
-            padding: 10px 20px;
+            padding: 60px 20px 20px;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-end;
             align-items: center;
-            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-            position: absolute;
-            top: 0;
+            gap: 10px;
         }
 
         .status-icons {
             display: flex;
             align-items: center;
-            gap: 5px;
+            gap: 8px;
+            margin-right: 5px;
         }
 
         .wifi-icon::before {
-            content: '📶';
-            font-size: 14px;
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24"><path d="M12 6C8.62 6 5.5 7.12 3 9L1.2 6.6C4.21 4.34 7.95 3 12 3C16.05 3 19.79 4.34 22.8 6.6L21 9C18.5 7.12 15.38 6 12 6zM16.84 13.41C15.44 12.5 13.78 12 12 12C10.22 12 8.56 12.5 7.16 13.41L5.36 11C7.23 9.72 9.53 9 12 9C14.47 9 16.77 9.72 18.64 11L16.84 13.41zM12 15C10.65 15 9.4 15.45 8.4 16.25L12 21L15.6 16.25C14.6 15.45 13.35 15 12 15z"/></svg>') center/cover no-repeat;
         }
 
         .signal-icon::before {
-            content: '📱';
-            font-size: 14px;
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" fill="white" viewBox="0 0 24 24"><path d="M2 22h20V2z"/></svg>') center/cover no-repeat;
+        }
+
+        .unlock-swipe {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 18px;
+            opacity: 0.8;
+        }
+
+        .unlock-indicator {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            position: relative;
+            animation: pulseUp 2s infinite;
+        }
+
+        .unlock-indicator::after {
+            content: '↑';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: white;
+        }
+
+        @keyframes pulseUp {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: translateY(-20px) scale(0.9);
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .unlock-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            z-index: 9999;
         }
 
         .battery-container {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 5px 10px;
-            border-radius: 12px;
-            color: black;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .dock .icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 18px;
+            backdrop-filter: blur(10px);
+            margin: 0;
             display: flex;
+            justify-content: center;
             align-items: center;
-            gap: 5px;
-            font-weight: 500;
+            font-size: 26px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .dock .icon:active {
+            transform: scale(0.8);
+        }
+
+        @media (min-width: 769px) {
+            body::before {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -103,6 +190,15 @@
     <div class="date" id="date"></div>
     <div class="unlock">Смахните вверх для разблокировки</div>
 
+    <div class="unlock-animation"></div>
+
+    <div class="dock">
+        <div class="icon" onclick="openApp('tel:')">📞</div>
+        <div class="icon" onclick="openApp('sms:')">✉️</div>
+        <div class="icon" onclick="openApp('https://www.google.com')">🌍</div>
+        <div class="icon" onclick="openApp('music:')">🎵</div>
+    </div>
+
     <script>
         function updateTime() {
             const now = new Date();
@@ -117,6 +213,52 @@
 
         setInterval(updateTime, 1000);
         updateTime();
+
+        let touchStartY = 0;
+        let touchStartTime = 0;
+        const unlockAnimation = document.querySelector('.unlock-animation');
+        const body = document.querySelector('body');
+
+        function handleStart(e) {
+            touchStartY = e.type === 'mousedown' ? e.clientY : e.touches[0].clientY;
+            touchStartTime = Date.now();
+        }
+
+        function handleMove(e) {
+            if (!touchStartY) return;
+            
+            const currentY = e.type === 'mousemove' ? e.clientY : e.touches[0].clientY;
+            const deltaY = touchStartY - currentY;
+            
+            if (deltaY > 100) {
+                const velocity = deltaY / (Date.now() - touchStartTime);
+                if (velocity > 0.3) {
+                    unlockDevice();
+                }
+            }
+        }
+
+        function handleEnd() {
+            touchStartY = 0;
+        }
+
+        function unlockDevice() {
+            unlockAnimation.style.opacity = '1';
+            setTimeout(() => {
+                window.location.href = 'homescreen.html';
+            }, 500);
+        }
+
+        document.addEventListener('mousedown', handleStart);
+        document.addEventListener('touchstart', handleStart);
+        document.addEventListener('mousemove', handleMove);
+        document.addEventListener('touchmove', handleMove, { passive: false });
+        document.addEventListener('mouseup', handleEnd);
+        document.addEventListener('touchend', handleEnd);
+
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+        }, { passive: false });
     </script>
 </body>
 </html>
